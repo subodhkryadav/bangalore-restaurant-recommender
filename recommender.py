@@ -2,7 +2,7 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-df = pd.read_csv("C:\\Users\\subod\\OneDrive\\Desktop\\zomato_project\\load and clean data\\cleaned_data.csv")
+df = pd.read_csv("load and clean data/cleaned_data.csv")
 df['combined'] = df['name'] + ' ' + df['cuisines'].fillna('')
 
 vectorizer = TfidfVectorizer(stop_words='english')
