@@ -3,7 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Load only top 1000 rows to reduce memory usage
-df = pd.read_csv("load and clean data/cleaned_data.csv").head(5000)
+df = pd.read_csv("load and clean data/cleaned_data.csv").head(2100)
 
 # Fill missing values and combine name and cuisines
 df['combined'] = df['name'] + ' ' + df['cuisines'].fillna('')
