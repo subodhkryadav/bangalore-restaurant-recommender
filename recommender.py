@@ -2,23 +2,23 @@ import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load only top 2100 rows to reduce memory usage
+# Load top 2100 rows (optional for performance)
 df = pd.read_csv("load and clean data/cleaned_data.csv").head(2100)
 
-# Fill missing values and combine name and cuisines
+# Fill missing cuisines and create 'combined' column
 df['combined'] = df['name'] + ' ' + df['cuisines'].fillna('')
 
-# TF-IDF and cosine similarity
+# TF-IDF vectorization
 vectorizer = TfidfVectorizer(stop_words='english')
 tfidf_matrix = vectorizer.fit_transform(df['combined'])
 
-# Precompute cosine similarity
+# Cosine similarity matrix
 cosine_sim = cosine_similarity(tfidf_matrix, tfidf_matrix)
 
-# Create reverse index (lowercased and stripped names)
+# Create index mapping: lowercase and strip names
 indices = pd.Series(df.index, index=df['name'].str.lower().str.strip()).drop_duplicates()
 
-# Recommendation function
+# Main recommendation function
 def recommend_restaurant(name):
     name = name.lower().strip()
 
@@ -26,8 +26,17 @@ def recommend_restaurant(name):
         return "Restaurant not found in database."
 
     idx = indices[name]
-    sim_scores = list(enumerate(cosine_sim[idx]))
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)[1:11]
-    restaurant_indices = [i[0] for i in sim_scores]
+
+    # Flatten the similarity vector to avoid ambiguity
+    sim_scores = list(enumerate(cosine_sim[idx].flatten()))
+
+    # Sort by similarity score (highest to lowest)
+    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
+
+    # Skip the first one (it’s the same restaurant)
+    top_matches = sim_scores[1:11]
+
+    # Get the top 10 recommended restaurant indices
+    restaurant_indices = [i[0] for i in top_matches]
 
     return df.iloc[restaurant_indices][['name', 'location', 'rate', 'cost']].reset_index(drop=True)
